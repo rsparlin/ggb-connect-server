@@ -1,0 +1,8 @@
+create table sessions (
+   id uuid primary key,
+   version varchar(32) not null,
+   created timestamp default now(),
+   doc text
+);
+
+create index created on sessions(created);
