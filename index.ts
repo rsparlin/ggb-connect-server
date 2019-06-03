@@ -2,6 +2,7 @@
 
 import * as Hapi from '@hapi/hapi';
 import * as Boom from '@hapi/boom';
+import * as SocketIo from 'socket.io';
 
 import { GGBConnectDatabase } from './database';
 import { GGBConnectApp } from './app';
@@ -12,38 +13,41 @@ if (!process.env.POSTGRES_URI) {
   process.exit(2);
 } else {
   (async (postgresUri: string, address: string = 'localhost', port: number = 8080) => {
-    /* Create app instance */
-    const db = new GGBConnectDatabase(postgresUri);
-    const app = new GGBConnectApp(db);
-
     /* Create Hapi server */
     const serv = new Hapi.Server({
       address,
       port,
     });
 
+    /* Create socket.io handler */
+    const io = SocketIo(serv.listener);
+
+    /* Create app instance */
+    const db = new GGBConnectDatabase(postgresUri);
+    const app = new GGBConnectApp(db, io);
+
     /* Hapi logging with 'good' module */
     await serv.register({
       plugin: require('good'),
       options: {
         ops: {
-          interval: 1000
+          interval: 1000,
         },
         reporters: {
           myConsoleReporter: [
             {
-                module: 'good-squeeze',
-                name: 'Squeeze',
-                args: [{ log: '*', response: '*', error: '*' }]
+              module: 'good-squeeze',
+              name: 'Squeeze',
+              args: [{ log: '*', response: '*', error: '*' }],
             },
             {
-                module: 'good-console',
-                args: [{
-                  format: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
-                }]
+              module: 'good-console',
+              args: [{
+                format: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
+              }],
             },
             'stdout',
-          ]
+          ],
         },
       },
     });
@@ -74,7 +78,7 @@ if (!process.env.POSTGRES_URI) {
           sessionId,
           command,
         } = <{ [key: string]: any }> (req.payload || {});
-        
+
         if (typeof sessionId !== 'string' || typeof command !== 'string') {
           throw Boom.badRequest('Expected params: sessionId, command');
         }
@@ -99,7 +103,7 @@ if (!process.env.POSTGRES_URI) {
         }
 
         const doc = await app.getBase64(sessionId);
-        
+
         if (doc === null) throw Boom.notFound('Session with specified id not found.');
         return h.response(doc).code(200);
       },
@@ -118,7 +122,7 @@ if (!process.env.POSTGRES_URI) {
         }
 
         const doc = await app.getPNG(sessionId);
-        
+
         if (doc === null) throw Boom.notFound('Session with specified id not found.');
         return h.response(doc).header('content-type', 'image/png').code(200);
       },
@@ -137,10 +141,35 @@ if (!process.env.POSTGRES_URI) {
         }
 
         const doc = await app.saveBase64(sessionId);
-        
+
         if (doc === null) throw Boom.notFound('Session with specified id not found.');
         return h.response(doc).code(200);
       },
+    });
+
+    /* Handle socket.io connections */
+    io.on('connection', (socket) => {
+      socket.on('subscribe', (sessionId: any, cb: (res: any) => {}) => {
+        if (typeof sessionId !== 'string') {
+          return cb({
+            success: false,
+            error: 'Invalid session id',
+          });
+        }
+
+        /* Get session */
+        const sess = app.getSession(sessionId);
+
+        if (sess === undefined) {
+          return cb({
+            success: false,
+            error: 'Session with specified id not found.',
+          });
+        }
+
+        /* Join room for session */
+        socket.join(sess.id);
+      });
     });
 
     /* Start server */

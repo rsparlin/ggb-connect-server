@@ -6,16 +6,16 @@ import { EventEmitter } from 'events';
 import { ActiveSession } from './types';
 import { GGBConnectDatabase } from './database';
 
-import { Page} from 'puppeteer';
+import * as SocketIo from 'socket.io';
 
 export class GGBConnectApp {
   private sessions: Map<string, ActiveSession>;
 
-  constructor(private db: GGBConnectDatabase) {
+  constructor(private db: GGBConnectDatabase, private io: SocketIo.Server) {
     this.sessions = new Map<string, ActiveSession>();
   }
 
-  private getSession(sessionId: string): ActiveSession | undefined {
+  public getSession(sessionId: string): ActiveSession | undefined {
     return this.sessions.get(sessionId);
   }
 
@@ -25,30 +25,29 @@ export class GGBConnectApp {
 
     /* Add session to store */
     const plotter = new GGBPlotter({ ggb: 'local' });
-    const emitter = new EventEmitter();
 
     this.sessions.set(sessionId, {
-      id: sessionId,
       plotter,
-      emitter,
+      id: sessionId,
     });
 
     /* Add event listeners */
     const page = await plotter.pagePromise;
-    let window: any;
 
     page.exposeFunction('addListener', (...args: any[]) => {
-      emitter.emit('add', ...args);
+      this.io.to(sessionId).emit('add', ...args);
     });
     page.exposeFunction('removeListener', (...args: any[]) => {
-      emitter.emit('remove', ...args);
+      this.io.to(sessionId).emit('remove', ...args);
     });
     page.exposeFunction('updateListener', (...args: any[]) => {
-      emitter.emit('update', ...args);
+      this.io.to(sessionId).emit('update', ...args);
     });
     page.exposeFunction('renameListener', (...args: any[]) => {
-      emitter.emit('rename', ...args);
+      this.io.to(sessionId).emit('rename', ...args);
     });
+
+    const window: any = {};
 
     page.evaluate(() => {
       window.ggbApplet.registerAddListener('addListener');
@@ -59,7 +58,7 @@ export class GGBConnectApp {
 
     /* Done */
     return {
-      sessionId: sessionId,
+      sessionId,
       websocketLink: `/session/${encodeURIComponent(sess.id)}`,
     };
   }

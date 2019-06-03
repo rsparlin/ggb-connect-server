@@ -11,5 +11,4 @@ export type Session = {
 
 export type ActiveSession = {
   plotter: GGBPlotter;
-  emitter: EventEmitter;
 } & Session;

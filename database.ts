@@ -16,18 +16,18 @@ export class GGBConnectDatabase {
         ON CONFLICT (id) DO NOTHING RETURNING (id)`,
       [sessionId, version],
     );
-    
+
     return {
       id: sessionId,
-    }
+    };
   }
 
   async updateDoc(sessionId: string, doc: string) {
     const res = await this.db.one(
-      `UPDATE sessions SET doc=$2 WHERE id=$1 RETURNING (id, doc)`,
+      'UPDATE sessions SET doc=$2 WHERE id=$1 RETURNING (id, doc)',
       [sessionId, doc],
     );
-    
+
     return res;
   }
 }
