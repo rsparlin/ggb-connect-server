@@ -28,12 +28,12 @@ declare module 'node-geogebra' {
     /** format can be: png, pdf, svg, ggb. It returns a string containing a base64 representation of the buffer. */
     public export64(format: 'png' | 'pdf' | 'svg' | 'ggb'): Promise<string>;
     public exportPNG(alpha: boolean, dpi: number): Promise<Buffer>;
-    public exportPNG64(alpha: boolean, dpi: number): Promise<String>;
+    public exportPNG64(alpha: boolean, dpi: number): Promise<string>;
     public exportPDF(): Promise<Buffer>;
-    public exportPDF64(): Promise<String>;
+    public exportPDF64(): Promise<string>;
     public exportSVG(): Promise<Buffer>;
-    public exportSVG64(): Promise<String>;
+    public exportSVG64(): Promise<string>;
     public exportGGB(): Promise<Buffer>;
-    public exportGGB64(): Promise<String>;
+    public exportGGB64(): Promise<string>;
   }
 }
