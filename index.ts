@@ -133,7 +133,7 @@ if (!process.env.POSTGRES_URI) {
       path: '/saveCurrSession',
       handler: async (req, h) => {
         const {
-          id: sessionId,
+          sessionId,
         } = <{ [key: string]: any }> (req.payload || {});
 
         if (typeof sessionId !== 'string') {

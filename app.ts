@@ -31,7 +31,7 @@ export class GGBConnectApp {
       id: sessionId,
     });
 
-    /* Add event listeners */
+    /* Set perspective and add event listeners */
     const page = await plotter.pagePromise;
 
     page.exposeFunction('addListener', (...args: any[]) => {
@@ -50,6 +50,7 @@ export class GGBConnectApp {
     const window: any = {};
 
     page.evaluate(() => {
+      window.ggbApplet.setPerspective('T');
       window.ggbApplet.registerAddListener('addListener');
       window.ggbApplet.registerRemoveListener('removeListener');
       window.ggbApplet.registerUpdateListener('updateListener');
