@@ -20,7 +20,7 @@ class Database {
   }
 
   async getSession(sessionId: string, version: string): Promise<Session> {
-    const res = await this.db.one(
+    const res = await this.db.oneOrNone(
       `INSERT INTO sessions (id, version) VALUES ($1, $2)
         ON CONFLICT (id) DO NOTHING RETURNING (id)`,
       [sessionId, version],
@@ -55,6 +55,9 @@ class GGBConnectApp {
   public async handshake(sessionId: string, version: string) {
     /* Create session */
     const sess = await this.db.getSession(sessionId, version);
+
+    /* Add session to store and return */
+    this.plotters.set(sessionId, new GGBPlotter({ ggb: 'local' }));
 
     return {
       sessionId: sessionId,
@@ -175,8 +178,8 @@ if (!process.env.POSTGRES_URI) {
         const {
           id,
           command,
-        } = req.query;
-
+        } = <{ [key: string]: any }> req.payload;
+        
         if (typeof id !== 'string' || typeof command !== 'string') {
           throw Boom.badRequest('Expected params: id, command');
         }
@@ -210,7 +213,7 @@ if (!process.env.POSTGRES_URI) {
       handler: async (req, h) => {
         const {
           id,
-        } = req.query;
+        } = <{ [key: string]: any }> req.payload;
 
         if (typeof id !== 'string') {
           throw Boom.badRequest('Expected params: id');
