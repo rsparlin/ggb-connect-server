@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/hapi__hapi": "^18.2.3",
+    "@types/puppeteer": "^1.12.4",
     "@types/uuid": "^3.4.4",
     "ts-node": "^8.0.3",
     "ts-node-dev": "^1.0.0-pre.39",
