@@ -3,6 +3,8 @@ declare module 'node-geogebra' {
   import { EventEmitter } from 'events';
 
   export class GGBPlotter {
+    public pagePromise: Promise<Page>;
+
     constructor(opts: {
       ggb: 'remote' | 'local',
     });
@@ -22,7 +24,7 @@ declare module 'node-geogebra' {
     /** Executes the property on the window.ggbApplet object.
      * For instance plotter.exec("reset") would do the same job as plotter.reset()
      */
-    public exec(property: string, args: string[]): Promise<any>;
+    public exec(property: string, args: any[]): Promise<any>;
     /** format can be: png, pdf, svg, ggb. It returns a buffer or a string depending on the format. */
     public export(format: 'png' | 'pdf' | 'svg' | 'ggb'): Promise<Buffer | string>;
     /** format can be: png, pdf, svg, ggb. It returns a string containing a base64 representation of the buffer. */

@@ -78,7 +78,10 @@ if (!process.env.POSTGRES_URI) {
         if (typeof sessionId !== 'string' || typeof command !== 'string') {
           throw Boom.badRequest('Expected params: sessionId, command');
         }
-        await app.command(sessionId, command);
+
+        const res = await app.command(sessionId, command);
+
+        if (!res) throw Boom.notFound('Session with specified id not found.');
         return h.response().code(200);
       },
     });

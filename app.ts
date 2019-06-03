@@ -6,6 +6,8 @@ import { EventEmitter } from 'events';
 import { ActiveSession } from './types';
 import { GGBConnectDatabase } from './database';
 
+import { Page} from 'puppeteer';
+
 export class GGBConnectApp {
   private sessions: Map<string, ActiveSession>;
 
@@ -32,6 +34,28 @@ export class GGBConnectApp {
     });
 
     /* Add event listeners */
+    const page = await plotter.pagePromise;
+    let window: any;
+
+    page.exposeFunction('addListener', (...args: any[]) => {
+      emitter.emit('add', ...args);
+    });
+    page.exposeFunction('removeListener', (...args: any[]) => {
+      emitter.emit('remove', ...args);
+    });
+    page.exposeFunction('updateListener', (...args: any[]) => {
+      emitter.emit('update', ...args);
+    });
+    page.exposeFunction('renameListener', (...args: any[]) => {
+      emitter.emit('rename', ...args);
+    });
+
+    page.evaluate(() => {
+      window.ggbApplet.registerAddListener('addListener');
+      window.ggbApplet.registerRemoveListener('removeListener');
+      window.ggbApplet.registerUpdateListener('updateListener');
+      window.ggbApplet.registerRenameListener('renameListener');
+    });
 
     /* Done */
     return {
