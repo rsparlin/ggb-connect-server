@@ -3,7 +3,6 @@
 import * as Hapi from '@hapi/hapi';
 import * as Boom from '@hapi/boom';
 import * as SocketIo from 'socket.io';
-
 import { GGBConnectDatabase } from './database';
 import { GGBConnectApp } from './app';
 
@@ -24,11 +23,12 @@ if (!process.env.POSTGRES_URI) {
 
     /* Create app instance */
     const db = new GGBConnectDatabase(postgresUri);
+    await db.init();
     const app = new GGBConnectApp(db, io);
 
     /* Hapi logging with 'good' module */
     await serv.register({
-      plugin: require('good'),
+      plugin: require('@hapi/good'),
       options: {
         ops: {
           interval: 1000,
@@ -36,12 +36,12 @@ if (!process.env.POSTGRES_URI) {
         reporters: {
           myConsoleReporter: [
             {
-              module: 'good-squeeze',
+              module: '@hapi/good-squeeze',
               name: 'Squeeze',
               args: [{ log: '*', response: '*', error: '*' }],
             },
             {
-              module: 'good-console',
+              module: '@hapi/good-console',
               args: [{
                 format: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
               }],

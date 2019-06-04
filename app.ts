@@ -24,7 +24,7 @@ export class GGBConnectApp {
     const sess = await this.db.getSession(sessionId, version);
 
     /* Add session to store */
-    const plotter = new GGBPlotter({ ggb: 'local' });
+    const plotter = new GGBPlotter({ ggb: 'remote' });
 
     this.sessions.set(sessionId, {
       plotter,

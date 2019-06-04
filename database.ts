@@ -10,6 +10,19 @@ export class GGBConnectDatabase {
     this.db = GGBConnectDatabase.pgp(uri);
   }
 
+  async init(): Promise<void> {
+    await this.db.none(`
+      create table if not exists sessions (
+        id uuid primary key,
+        version varchar(32) not null,
+        created timestamp default now(),
+        doc text
+      );
+
+      create index if not exists created on sessions(created);
+    `);
+  }
+
   async getSession(sessionId: string, version: string): Promise<Session> {
     const res = await this.db.oneOrNone(
       `INSERT INTO sessions (id, version) VALUES ($1, $2)
