@@ -1,21 +1,16 @@
-FROM node:current-alpine
+FROM node:current-stretch
 
-# Installs latest Chromium (63) package.
-RUN apk update && apk upgrade && \
-    echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
-    echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
-    apk add --no-cache \
-      chromium@edge \
-      nss@edge
+RUN apt-get -y update && apt-get -y install build-essential chromium libatk-bridge2.0-0 libharfbuzz-bin libgtk-3-0
+RUN groupadd webapp && useradd -g webapp -d /webapp/ webapp
 
-RUN addgroup -S webapp && adduser -S -g webapp webapp \
-    && mkdir /webapp \
-    && chown -R webapp:webapp /webapp
+ADD *.ts *.json yarn.lock /webapp/
+
+RUN chown -R webapp:webapp /webapp/
+
+# FIX for case-sensitive fs issue with node-geogebra
+RUN su webapp -lc "yarn && mv /webapp/node_modules/node-geogebra/geogebra-math-apps-bundle/GeoGebra /webapp/node_modules/node-geogebra/geogebra-math-apps-bundle/Geogebra"
 
 USER webapp
 WORKDIR /webapp/
-ADD *.ts *.json yarn.lock /webapp/
-
-RUN yarn
 
 ENTRYPOINT [ "/bin/sh", "-c", "yarn start" ]
