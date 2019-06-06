@@ -60,7 +60,6 @@ export class GGBConnectApp {
     /* Done */
     return {
       sessionId,
-      websocketLink: `/session/${encodeURIComponent(sess.id)}`,
     };
   }
 
