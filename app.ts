@@ -87,6 +87,21 @@ export class GGBConnectApp {
     return session.plotter.exportGGB64();
   }
 
+  public async getXml(sessionId: string): Promise<string | null> {
+    /* Get plotter */
+    const session = this.getSession(sessionId);
+
+    if (session === undefined) return null;
+    if (session.plotter === undefined) return null;
+
+    /* Export in XML format */
+    const page = await session.plotter.pagePromise;
+    const window: any = {};
+    return page.evaluate(() => {
+      return window.ggbApplet.getXML();
+    });
+  }
+
   public async getPNG(sessionId: string): Promise<Buffer | null> {
     /* Get plotter */
     const session = this.getSession(sessionId);
@@ -101,6 +116,17 @@ export class GGBConnectApp {
   public async saveBase64(sessionId: string): Promise<string | null> {
     /* Get base64 document */
     const doc = await this.getBase64(sessionId);
+
+    if (doc === null) return null;
+
+    /* Write to database and return */
+    await this.db.updateDoc(sessionId, doc);
+    return doc;
+  }
+
+  public async saveXml(sessionId: string): Promise<string | null> {
+    /* Get base64 document */
+    const doc = await this.getXml(sessionId);
 
     if (doc === null) return null;
 

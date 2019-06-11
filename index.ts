@@ -66,7 +66,9 @@ if (!process.env.POSTGRES_URI) {
           throw Boom.badRequest('Expected params: sessionId, version');
         }
 
-        return h.response(await app.handshake(sessionId, version)).code(200);
+        return (app.getSession(sessionId) === undefined)
+          ? h.response(await app.handshake(sessionId, version)).code(200)
+          : h.response(await app.getXml(sessionId) || '').code(200);
       },
     });
 
@@ -102,7 +104,7 @@ if (!process.env.POSTGRES_URI) {
           throw Boom.badRequest('Expected params: sessionId');
         }
 
-        const doc = await app.getBase64(sessionId);
+        const doc = await app.getXml(sessionId);
 
         if (doc === null) throw Boom.notFound('Session with specified id not found.');
         return h.response(doc).code(200);
@@ -140,7 +142,7 @@ if (!process.env.POSTGRES_URI) {
           throw Boom.badRequest('Expected params: sessionId');
         }
 
-        const doc = await app.saveBase64(sessionId);
+        const doc = await app.saveXml(sessionId);
 
         if (doc === null) throw Boom.notFound('Session with specified id not found.');
         return h.response(doc).code(200);
