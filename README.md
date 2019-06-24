@@ -1,5 +1,4 @@
-
-# API Specification
+## ggb-connect-server API Specification
 
 ```
 /handshake
@@ -21,15 +20,15 @@
   Method: GET
   Parameters:
     - sessionId: string
-  Response body: ggbApplet.getBase64() string
+  Response body: ggbApplet.getXML() string
   Response code 200 on success.
 /saveCurrSession
   Method: POST
   Accepted content-types: application/json, application/x-www-form-urlencoded
   Parameters:
     - sessionId: string
-  Writes ggbApplet.getBase64() base64-encoded string for specified session to database.
-  Response body: ggbApplet.getBase64() string
+  Writes ggbApplet.getXML() string for specified session to database.
+  Response body: ggbApplet.getXML() string
   Response code 200 on success.
 /appExec
   Method: POST
