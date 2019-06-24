@@ -93,6 +93,29 @@ if (!process.env.POSTGRES_URI) {
     });
 
     serv.route({
+      method: 'POST',
+      path: '/appExec',
+      handler: async (req, h) => {
+        const {
+          sessionId,
+          property,
+          args,
+        } = <{ [key: string]: any }> (req.payload || {});
+
+        if (typeof sessionId !== 'string'
+        || typeof property !== 'string'
+        || !(args instanceof Array)) {
+          throw Boom.badRequest('Expected params: sessionId, command, args');
+        }
+
+        const res = await app.exec(sessionId, property, args);
+
+        if (!res) throw Boom.notFound('Session with specified id not found.');
+        return h.response(res.result).code(200);
+      },
+    });
+
+    serv.route({
       method: 'GET',
       path: '/getCurrSession',
       handler: async (req, h) => {

@@ -40,8 +40,15 @@ export class GGBConnectApp {
     page.exposeFunction('removeListener', (...args: any[]) => {
       this.io.to(sessionId).emit('remove', ...args);
     });
-    page.exposeFunction('updateListener', (...args: any[]) => {
-      this.io.to(sessionId).emit('update', ...args);
+    page.exposeFunction('updateListener', async (objName: string) => {
+      const obj = await page.evaluate(
+        (objName) => {
+          return window.ggbApplet.getValueString(objName);
+        },
+        objName,
+      );
+
+      this.io.to(sessionId).emit('update', obj);
     });
     page.exposeFunction('renameListener', (...args: any[]) => {
       this.io.to(sessionId).emit('rename', ...args);
@@ -74,6 +81,35 @@ export class GGBConnectApp {
     await session.plotter.evalGGBScript([command]);
 
     return true;
+  }
+
+  public async exec(sessionId: string, prop: string, args: string[]): Promise<{
+    result: any,
+  } | null> {
+    /* Get plotter or return false if not found */
+    const session = this.getSession(sessionId);
+
+    if (session === undefined || session.plotter === undefined) {
+      return null;
+    }
+
+    /* Eval command */
+    const page = await session.plotter.pagePromise;
+    const window: { [name: string]: any } = {};
+
+    const result = await page.evaluate(
+      (prop, args) => {
+        const func = window.ggbApplet[prop];
+
+        return (typeof func === 'function') ? func.apply(window.ggbApplet, args) : null;
+      },
+      prop,
+      args,
+    );
+
+    return {
+      result,
+    };
   }
 
   public async getBase64(sessionId: string): Promise<string | null> {
