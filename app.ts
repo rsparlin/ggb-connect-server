@@ -83,14 +83,12 @@ export class GGBConnectApp {
     return true;
   }
 
-  public async exec(sessionId: string, prop: string, args: string[]): Promise<{
-    result: any,
-  } | null> {
+  public async exec(sessionId: string, prop: string, args: string[]): Promise<boolean> {
     /* Get plotter or return false if not found */
     const session = this.getSession(sessionId);
 
     if (session === undefined || session.plotter === undefined) {
-      return null;
+      return false;
     }
 
     /* Eval command */
@@ -107,9 +105,7 @@ export class GGBConnectApp {
       args,
     );
 
-    return {
-      result,
-    };
+    return true;
   }
 
   public async getBase64(sessionId: string): Promise<string | null> {

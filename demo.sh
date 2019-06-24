@@ -12,9 +12,9 @@ curl -s "$ORIGIN/getPNG?sessionId=$SID" > "$SID.png"
 curl -s -X POST "$ORIGIN/appExec" \
   --header 'content-type: application/json' \
   --data '{
-	"sessionId": "c55d57b8-8624-11e9-bc42-526af7764f64",
-	"property": "getValueString",
-	"args": [ "f" ]
+    "sessionId": "c55d57b8-8624-11e9-bc42-526af7764f64",
+    "property": "reset",
+    "args": []
   }';
 
 kill %1

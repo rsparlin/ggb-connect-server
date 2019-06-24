@@ -111,7 +111,7 @@ if (!process.env.POSTGRES_URI) {
         const res = await app.exec(sessionId, property, args);
 
         if (!res) throw Boom.notFound('Session with specified id not found.');
-        return h.response(res.result).code(200);
+        return h.response().code(200);
       },
     });
 
