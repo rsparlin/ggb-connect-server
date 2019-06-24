@@ -1,7 +1,7 @@
 {
   "name": "ggb-connect-server",
   "author": "Ryan Sparlin",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "build": "tsc",
