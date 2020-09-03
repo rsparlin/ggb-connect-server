@@ -12,7 +12,7 @@
     "@hapi/good": "^8.2.0",
     "@hapi/good-console": "^8.1.0",
     "@hapi/good-squeeze": "^5.2.0",
-    "@hapi/hapi": "^18.3.1",
+    "@hapi/hapi": "^19.1.1",
     "node-geogebra": "^1.0.1",
     "pg": "^7.11.0",
     "pg-promise": "^8.7.2",
